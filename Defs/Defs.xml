@@ -1,0 +1,8 @@
+<Defs>
+  <RecipeDef>
+    <defName>CompleteUnfinished</defName>
+    <label>label</label>
+    <description>description</description>
+    <jobString>jobString.</jobString>
+  </RecipeDef>
+</Defs>
