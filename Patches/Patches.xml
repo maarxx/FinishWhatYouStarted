@@ -18,4 +18,22 @@
           </value>
       </match>
   </Operation>
+
+  <Operation Class="PatchOperationConditional">
+      <xpath>/Defs/ThingDef[defName="FabricationBench"]/recipes</xpath>
+      <nomatch Class="PatchOperationAdd">
+          <xpath>/Defs/ThingDef[defName="FabricationBench"]</xpath>
+          <value>
+              <recipes>
+                  <li>FinishWhatYouStarted_Recipe</li>
+              </recipes>
+          </value>
+      </nomatch>
+      <match Class="PatchOperationAdd">
+          <xpath>/Defs/ThingDef[defName="FabricationBench"]/recipes</xpath>
+          <value>
+              <li>FinishWhatYouStarted_Recipe</li>
+          </value>
+      </match>
+  </Operation>
 </Patch>
