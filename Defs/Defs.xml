@@ -1,6 +1,6 @@
 <Defs>
   <RecipeDef>
-    <defName>CompleteUnfinished</defName>
+    <defName>FinishWhatYouStarted_Recipe</defName>
     <label>label</label>
     <description>description</description>
     <jobString>jobString.</jobString>

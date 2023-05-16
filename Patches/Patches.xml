@@ -7,14 +7,14 @@
           <xpath>/Defs/ThingDef[defName="TableMachining"]</xpath>
           <value>
               <recipes>
-                  <li>CompleteUnfinished</li>
+                  <li>FinishWhatYouStarted_Recipe</li>
               </recipes>
           </value>
       </nomatch>
       <match Class="PatchOperationAdd">
           <xpath>/Defs/ThingDef[defName="TableMachining"]/recipes</xpath>
           <value>
-              <li>CompleteUnfinished</li>
+              <li>FinishWhatYouStarted_Recipe</li>
           </value>
       </match>
   </Operation>
