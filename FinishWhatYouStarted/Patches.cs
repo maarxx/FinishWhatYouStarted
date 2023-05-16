@@ -27,7 +27,7 @@ namespace FinishWhatYouStarted
             Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
             if (recipe.defName == "FinishWhatYouStarted_Recipe")
             {
-                __result = new FinishWhatYouStarted_Bill();
+                __result = new FinishWhatYouStarted_Bill(recipe, precept);
                 return false;
             }
             return true;

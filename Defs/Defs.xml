@@ -1,8 +1,9 @@
 <Defs>
   <RecipeDef>
     <defName>FinishWhatYouStarted_Recipe</defName>
-    <label>label</label>
-    <description>description</description>
-    <jobString>jobString.</jobString>
+    <label>complete unfinished thing</label>
+    <description>Complete any existing unfinished thing that matches this type of workbench.</description>
+    <jobString>finishing</jobString>
+    <workAmount>1</workAmount>
   </RecipeDef>
 </Defs>
