@@ -27,7 +27,7 @@ namespace FinishWhatYouStarted
     {
         static bool Prefix(RecipeDef recipe, Precept_ThingStyle precept, ref Bill __result)
         {
-            Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
+            //Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
             if (recipe.defName == "FinishWhatYouStarted_Recipe")
             {
                 __result = new FinishWhatYouStarted_Bill(recipe, precept);
@@ -45,7 +45,7 @@ namespace FinishWhatYouStarted
     {
         static void Postfix(Bill_ProductionWithUft __instance, ref UnfinishedThing __result)
         {
-            Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
+            //Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
             if (__instance is FinishWhatYouStarted_Bill)
             {
                 if (__result != null && __result.Creator.CurJob?.bill != __instance)
@@ -65,7 +65,7 @@ namespace FinishWhatYouStarted
     {
         static void Postfix(Bill_ProductionWithUft __instance, ref Pawn __result)
         {
-            Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
+            //Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
             if (__instance is FinishWhatYouStarted_Bill)
             {
                 if (__result != null && __result.CurJob?.bill != __instance)
@@ -85,16 +85,17 @@ namespace FinishWhatYouStarted
     {
         static bool Prefix(Bill bill, Pawn pawn, Thing billGiver, List<ThingCount> chosen, List<IngredientCount> missingIngredients, ref bool __result)
         {
-            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
+            //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
             if (bill is FinishWhatYouStarted_Bill)
             {
                 FinishWhatYouStarted_Bill oldBill = (FinishWhatYouStarted_Bill)bill;
                 UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, billGiver);
                 if (ut != null)
                 {
-                    Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
+                    //Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
                     chosen.Add(new ThingCount(ut, 1));
                     FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(ut.Recipe, ut.StyleSourcePrecept);
+                    Utility.SwitchBills(oldBill, newBill);
                     newBill.ingredientFilter.SetDisallowAll();
                     newBill.SetBoundUft(ut);
                     __result = true;
@@ -113,7 +114,7 @@ namespace FinishWhatYouStarted
     {
         static bool Prefix(Pawn pawn, Bill_ProductionWithUft bill, ref UnfinishedThing __result)
         {
-            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_ClosestUnfinishedThingForBill");
+            //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_ClosestUnfinishedThingForBill");
             if (bill is FinishWhatYouStarted_Bill)
             {
                 __result = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);

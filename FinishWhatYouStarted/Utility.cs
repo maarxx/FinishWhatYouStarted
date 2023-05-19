@@ -11,6 +11,18 @@ namespace FinishWhatYouStarted
 {
     public class Utility
     {
+        public static void SwitchBills(Bill oldBill, Bill newBill)
+        {
+            BillStack billStack = oldBill.billStack;
+            int targetIndex = billStack.IndexOf(oldBill);
+            billStack.AddBill(newBill);
+            while (billStack.IndexOf(newBill) > targetIndex)
+            {
+                billStack.Reorder(newBill, -1);
+            }
+            billStack.Delete(oldBill);
+        }
+
         public static UnfinishedThing ClosestUnfinishedThingForWorkbench(Pawn pawn, Thing billGiver)
         {
             foreach (RecipeDef recipe in billGiver.def.AllRecipes)
