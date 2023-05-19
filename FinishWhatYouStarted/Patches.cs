@@ -1,7 +1,10 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Verse;
+using Verse.AI;
 
 namespace FinishWhatYouStarted
 {
@@ -28,6 +31,62 @@ namespace FinishWhatYouStarted
             if (recipe.defName == "FinishWhatYouStarted_Recipe")
             {
                 __result = new FinishWhatYouStarted_Bill(recipe, precept);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // RimWorld.WorkGiver_DoBill
+    // private static bool TryFindBestBillIngredients(Bill bill, Pawn pawn, Thing billGiver, List<ThingCount> chosen, List<IngredientCount> missingIngredients)
+    [HarmonyPatch(typeof(WorkGiver_DoBill))]
+    [HarmonyPatch("TryFindBestBillIngredients")]
+    class Patch_WorkGiver_DoBill_TryFindBestBillIngredients
+    {
+        static bool Prefix(Bill bill, Pawn pawn, Thing billGiver, List<ThingCount> chosen, List<IngredientCount> missingIngredients, ref bool __result)
+        {
+            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
+            if (bill.recipe.defName == "FinishWhatYouStarted_Recipe")
+            {
+                UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, billGiver);
+                if (ut != null)
+                {
+                    Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
+                    chosen.Add(new ThingCount(ut, 1));
+                    __result = true;
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+
+    // RimWorld.WorkGiver_DoBill
+    // public static Job TryStartNewDoBillJob(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, out Job haulOffJob, bool dontCreateJobIfHaulOffRequired = true)
+    [HarmonyPatch(typeof(WorkGiver_DoBill))]
+    [HarmonyPatch("TryStartNewDoBillJob")]
+    class Patch_WorkGiver_DoBill_TryStartNewDoBillJob
+    {
+        static bool Prefix(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, ref Job haulOffJob, bool dontCreateJobIfHaulOffRequired, Job __result)
+        {
+            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryStartNewDoBillJob");
+            if (bill.recipe.defName == "FinishWhatYouStarted_Recipe")
+            {
+                __result = null;
+                UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)giver);
+                if (ut != null)
+                {
+                    Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryStartNewDoBillJob");
+                    Bill_ProductionWithUft newBill = new Bill_ProductionWithUft(ut.Recipe, null);
+                    newBill.ingredientFilter.SetDisallowAll();
+                    newBill.SetBoundUft(ut);
+                    giver.BillStack.AddBill(newBill);
+                    // RimWorld.WorkGiver_DoBill
+                    // private static Job FinishUftJob(Pawn pawn, UnfinishedThing uft, Bill_ProductionWithUft bill)
+                    MethodInfo finishUftJob = typeof(WorkGiver_DoBill).GetMethod("FinishUftJob", BindingFlags.NonPublic | BindingFlags.Static);
+                    __result = (Job)finishUftJob.Invoke(null, new object[] { pawn, ut, newBill });
+                }
                 return false;
             }
             return true;
