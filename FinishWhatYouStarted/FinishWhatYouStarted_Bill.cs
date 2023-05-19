@@ -3,7 +3,7 @@ using Verse;
 
 namespace FinishWhatYouStarted
 {
-    public class FinishWhatYouStarted_Bill : Bill_Production
+    public class FinishWhatYouStarted_Bill : Bill_ProductionWithUft
     {
 
         public FinishWhatYouStarted_Bill()
