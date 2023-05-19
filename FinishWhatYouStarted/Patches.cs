@@ -78,35 +78,6 @@ namespace FinishWhatYouStarted
     }
 
     // RimWorld.WorkGiver_DoBill
-    // private static bool TryFindBestBillIngredients(Bill bill, Pawn pawn, Thing billGiver, List<ThingCount> chosen, List<IngredientCount> missingIngredients)
-    [HarmonyPatch(typeof(WorkGiver_DoBill))]
-    [HarmonyPatch("TryFindBestBillIngredients")]
-    class Patch_WorkGiver_DoBill_TryFindBestBillIngredients
-    {
-        static bool Prefix(Bill bill, Pawn pawn, Thing billGiver, List<ThingCount> chosen, List<IngredientCount> missingIngredients, ref bool __result)
-        {
-            //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
-            if (bill is FinishWhatYouStarted_Bill)
-            {
-                FinishWhatYouStarted_Bill oldBill = (FinishWhatYouStarted_Bill)bill;
-                UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, billGiver);
-                if (ut != null)
-                {
-                    //Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
-                    chosen.Add(new ThingCount(ut, 1));
-                    FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(ut.Recipe, ut.StyleSourcePrecept);
-                    Utility.SwitchBills(oldBill, newBill);
-                    newBill.ingredientFilter.SetDisallowAll();
-                    newBill.SetBoundUft(ut);
-                    __result = true;
-                    return false;
-                }
-            }
-            return true;
-        }
-    }
-
-    // RimWorld.WorkGiver_DoBill
     // private static UnfinishedThing ClosestUnfinishedThingForBill(Pawn pawn, Bill_ProductionWithUft bill)
     [HarmonyPatch(typeof(WorkGiver_DoBill))]
     [HarmonyPatch("ClosestUnfinishedThingForBill")]
@@ -117,45 +88,33 @@ namespace FinishWhatYouStarted
             //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_ClosestUnfinishedThingForBill");
             if (bill is FinishWhatYouStarted_Bill)
             {
-                __result = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
-                return false;
+                UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
+                if (ut != null)
+                {
+                    FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(ut.Recipe, ut.StyleSourcePrecept);
+                    Utility.SwitchBills(bill, newBill);
+                    newBill.ingredientFilter.SetDisallowAll();
+                    newBill.SetBoundUft(ut);
+                    __result = ut;
+                    return false;
+                }
             }
             return true;
         }
     }
 
     // RimWorld.WorkGiver_DoBill
-    // public static Job TryStartNewDoBillJob(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, out Job haulOffJob, bool dontCreateJobIfHaulOffRequired = true)
-    //[HarmonyPatch(typeof(WorkGiver_DoBill))]
-    //[HarmonyPatch("TryStartNewDoBillJob")]
-    //class Patch_WorkGiver_DoBill_TryStartNewDoBillJob
-    //{
-    //    static bool Prefix(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, ref Job haulOffJob, bool dontCreateJobIfHaulOffRequired, Job __result)
-    //    {
-    //        Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryStartNewDoBillJob");
-    //        if (bill.recipe.defName == "FinishWhatYouStarted_Recipe")
-    //        {
-    //            __result = null;
-    //            UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)giver);
-    //            if (ut != null)
-    //            {
-    //                Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryStartNewDoBillJob");
-    //                Bill_ProductionWithUft newBill = new Bill_ProductionWithUft(ut.Recipe, null);
-    //                newBill.ingredientFilter.SetDisallowAll();
-    //                newBill.SetBoundUft(ut);
-    //                giver.BillStack.AddBill(newBill);
-    //                while (giver.BillStack.IndexOf(newBill) > 0)
-    //                {
-    //                    giver.BillStack.Reorder(newBill, -1);
-    //                }
-    //                // RimWorld.WorkGiver_DoBill
-    //                // private static Job FinishUftJob(Pawn pawn, UnfinishedThing uft, Bill_ProductionWithUft bill)
-    //                MethodInfo finishUftJob = typeof(WorkGiver_DoBill).GetMethod("FinishUftJob", BindingFlags.NonPublic | BindingFlags.Static);
-    //                __result = (Job)finishUftJob.Invoke(null, new object[] { pawn, ut, newBill });
-    //            }
-    //            return false;
-    //        }
-    //        return true;
-    //    }
-    //}
+    // private static Job FinishUftJob(Pawn pawn, UnfinishedThing uft, Bill_ProductionWithUft bill)
+    [HarmonyPatch(typeof(WorkGiver_DoBill))]
+    [HarmonyPatch("FinishUftJob")]
+    class Patch_WorkGiver_DoBill_FinishUftJob
+    {
+        static bool Prefix(Pawn pawn, UnfinishedThing uft, ref Bill_ProductionWithUft bill, ref Job __result)
+        {
+            //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_FinishUftJob");
+            // Use reflection to bypass our quantum prefixes.
+            bill = (Bill_ProductionWithUft)uft.GetType().GetField("boundBillInt", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(uft);
+            return true;
+        }
+    }
 }
