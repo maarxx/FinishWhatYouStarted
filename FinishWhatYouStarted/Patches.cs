@@ -30,8 +30,40 @@ namespace FinishWhatYouStarted
             Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
             if (recipe.defName == "FinishWhatYouStarted_Recipe")
             {
-                __result = new FinishWhatYouStarted_Bill(recipe, precept);
+                __result = new FinishWhatYouStarted_BillMaster(recipe, precept);
                 return false;
+            }
+            return true;
+        }
+    }
+
+    // RimWorld.WorkGiver_DoBill
+    // private Job StartOrResumeBillJob(Pawn pawn, IBillGiver giver)
+    [HarmonyPatch(typeof(WorkGiver_DoBill))]
+    [HarmonyPatch("StartOrResumeBillJob")]
+    class Patch_WorkGiver_DoBill_StartOrResumeBillJob
+    {
+        static bool Prefix(WorkGiver_DoBill __instance, Pawn pawn, IBillGiver giver)
+        {
+            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_StartOrResumeBillJob");
+            FinishWhatYouStarted_BillSlave slave = null;
+            bool doIt = false;
+            foreach (Bill b in giver.BillStack)
+            {
+                if (b is FinishWhatYouStarted_BillSlave)
+                {
+                    slave = (FinishWhatYouStarted_BillSlave)b;
+                    Pawn reserver = pawn.Map.reservationManager.FirstRespectedReserver(slave.BoundUft, pawn);
+                    if (reserver != pawn)
+                    {
+                        //doIt = true;
+                    }
+                }
+            }
+            if (doIt)
+            {
+                FinishWhatYouStarted_BillMaster newMaster = new FinishWhatYouStarted_BillMaster(DefDatabase<RecipeDef>.GetNamed("FinishWhatYouStarted_Recipe"));
+                Utility.SwitchBills(slave, newMaster);
             }
             return true;
         }
@@ -46,7 +78,7 @@ namespace FinishWhatYouStarted
         static bool Prefix(Bill bill, Pawn pawn, Thing billGiver, List<ThingCount> chosen, List<IngredientCount> missingIngredients, ref bool __result)
         {
             Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryFindBestBillIngredients");
-            if (bill.recipe.defName == "FinishWhatYouStarted_Recipe")
+            if (bill is FinishWhatYouStarted_BillMaster)
             {
                 UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, billGiver);
                 if (ut != null)
@@ -61,7 +93,6 @@ namespace FinishWhatYouStarted
         }
     }
 
-
     // RimWorld.WorkGiver_DoBill
     // public static Job TryStartNewDoBillJob(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, out Job haulOffJob, bool dontCreateJobIfHaulOffRequired = true)
     [HarmonyPatch(typeof(WorkGiver_DoBill))]
@@ -71,21 +102,17 @@ namespace FinishWhatYouStarted
         static bool Prefix(Pawn pawn, Bill bill, IBillGiver giver, List<ThingCount> chosenIngThings, ref Job haulOffJob, bool dontCreateJobIfHaulOffRequired, Job __result)
         {
             Log.Message("HELLO FROM Patch_WorkGiver_DoBill_TryStartNewDoBillJob");
-            if (bill.recipe.defName == "FinishWhatYouStarted_Recipe")
+            if (bill is FinishWhatYouStarted_BillMaster)
             {
                 __result = null;
                 UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)giver);
                 if (ut != null)
                 {
                     Log.Message("FOUND UT IN Patch_WorkGiver_DoBill_TryStartNewDoBillJob");
-                    Bill_ProductionWithUft newBill = new Bill_ProductionWithUft(ut.Recipe, null);
+                    Bill_ProductionWithUft newBill = new FinishWhatYouStarted_BillSlave(ut.Recipe, null);
                     newBill.ingredientFilter.SetDisallowAll();
                     newBill.SetBoundUft(ut);
-                    giver.BillStack.AddBill(newBill);
-                    while (giver.BillStack.IndexOf(newBill) > 0)
-                    {
-                        giver.BillStack.Reorder(newBill, -1);
-                    }
+                    Utility.SwitchBills(bill, newBill);
                     // RimWorld.WorkGiver_DoBill
                     // private static Job FinishUftJob(Pawn pawn, UnfinishedThing uft, Bill_ProductionWithUft bill)
                     MethodInfo finishUftJob = typeof(WorkGiver_DoBill).GetMethod("FinishUftJob", BindingFlags.NonPublic | BindingFlags.Static);

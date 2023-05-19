@@ -31,8 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FinishWhatYouStarted_BillSlave.cs" />
     <Compile Include="Utility.cs" />
-    <Compile Include="FinishWhatYouStarted_Bill.cs" />
+    <Compile Include="FinishWhatYouStarted_BillMaster.cs" />
     <Compile Include="Patches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
