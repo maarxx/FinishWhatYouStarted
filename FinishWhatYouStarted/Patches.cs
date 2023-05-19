@@ -82,6 +82,10 @@ namespace FinishWhatYouStarted
                     newBill.ingredientFilter.SetDisallowAll();
                     newBill.SetBoundUft(ut);
                     giver.BillStack.AddBill(newBill);
+                    while (giver.BillStack.IndexOf(newBill) > 0)
+                    {
+                        giver.BillStack.Reorder(newBill, -1);
+                    }
                     // RimWorld.WorkGiver_DoBill
                     // private static Job FinishUftJob(Pawn pawn, UnfinishedThing uft, Bill_ProductionWithUft bill)
                     MethodInfo finishUftJob = typeof(WorkGiver_DoBill).GetMethod("FinishUftJob", BindingFlags.NonPublic | BindingFlags.Static);
