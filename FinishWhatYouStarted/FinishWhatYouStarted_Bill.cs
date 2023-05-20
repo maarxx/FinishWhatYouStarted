@@ -5,7 +5,7 @@ namespace FinishWhatYouStarted
 {
     public class FinishWhatYouStarted_Bill : Bill_ProductionWithUft
     {
-
+        public FinishWhatYouStarted_Bill master;
         public FinishWhatYouStarted_Bill()
         {
             // Intentionally left blank.

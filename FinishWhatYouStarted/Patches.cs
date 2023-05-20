@@ -27,7 +27,7 @@ namespace FinishWhatYouStarted
     {
         static bool Prefix(RecipeDef recipe, Precept_ThingStyle precept, ref Bill __result)
         {
-            //Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
+            Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
             if (recipe.defName == "FinishWhatYouStarted_Recipe")
             {
                 __result = new FinishWhatYouStarted_Bill(recipe, precept);
@@ -45,7 +45,7 @@ namespace FinishWhatYouStarted
     {
         static void Postfix(Bill_ProductionWithUft __instance, ref UnfinishedThing __result)
         {
-            //Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
+            Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
             if (__instance is FinishWhatYouStarted_Bill)
             {
                 if (__result != null && __result.Creator.CurJob?.bill != __instance)
@@ -65,7 +65,7 @@ namespace FinishWhatYouStarted
     {
         static void Postfix(Bill_ProductionWithUft __instance, ref Pawn __result)
         {
-            //Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
+            Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
             if (__instance is FinishWhatYouStarted_Bill)
             {
                 if (__result != null && __result.CurJob?.bill != __instance)
@@ -85,8 +85,9 @@ namespace FinishWhatYouStarted
     {
         static bool Prefix(Pawn pawn, Bill_ProductionWithUft bill, ref UnfinishedThing __result)
         {
-            //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_ClosestUnfinishedThingForBill");
-            if (bill is FinishWhatYouStarted_Bill)
+            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_ClosestUnfinishedThingForBill");
+            FinishWhatYouStarted_Bill casted = bill as FinishWhatYouStarted_Bill;
+            if (casted != null)
             {
                 UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
                 if (ut != null)
@@ -95,6 +96,7 @@ namespace FinishWhatYouStarted
                     Utility.SwitchBills(bill, newBill);
                     newBill.ingredientFilter.SetDisallowAll();
                     newBill.SetBoundUft(ut);
+                    newBill.master = casted;
                     __result = ut;
                     return false;
                 }
@@ -111,9 +113,9 @@ namespace FinishWhatYouStarted
     {
         static bool Prefix(Pawn pawn, UnfinishedThing uft, ref Bill_ProductionWithUft bill, ref Job __result)
         {
-            //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_FinishUftJob");
+            Log.Message("HELLO FROM Patch_WorkGiver_DoBill_FinishUftJob");
             // Use reflection to bypass our quantum prefixes.
-            bill = (Bill_ProductionWithUft)uft.GetType().GetField("boundBillInt", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(uft);
+            bill = uft.GetType().GetField("boundBillInt", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(uft) as Bill_ProductionWithUft;
             return true;
         }
     }
