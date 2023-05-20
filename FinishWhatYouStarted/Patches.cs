@@ -30,7 +30,7 @@ namespace FinishWhatYouStarted
             //Log.Message("HELLO FROM Patch_BillUtility_MakeNewBill");
             if (recipe.defName == "FinishWhatYouStarted_Recipe")
             {
-                __result = new FinishWhatYouStarted_Bill(recipe, precept);
+                __result = new FinishWhatYouStarted_Bill_Master(recipe, precept);
                 return false;
             }
             return true;
@@ -46,11 +46,12 @@ namespace FinishWhatYouStarted
         static void Postfix(Bill_ProductionWithUft __instance, ref UnfinishedThing __result)
         {
             //Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
-            if (__instance is FinishWhatYouStarted_Bill)
+            FinishWhatYouStarted_Bill_Slave casted = __instance as FinishWhatYouStarted_Bill_Slave;
+            if (casted != null)
             {
                 if (__result != null && __result.Creator.CurJob?.bill != __instance)
                 {
-                    __instance.ClearBoundUft();
+                    casted.stopImpersonating();
                     __result = null;
                 }
             }
@@ -66,11 +67,12 @@ namespace FinishWhatYouStarted
         static void Postfix(Bill_ProductionWithUft __instance, ref Pawn __result)
         {
             //Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
-            if (__instance is FinishWhatYouStarted_Bill)
+            FinishWhatYouStarted_Bill_Slave casted = __instance as FinishWhatYouStarted_Bill_Slave;
+            if (casted != null)
             {
                 if (__result != null && __result.CurJob?.bill != __instance)
                 {
-                    __instance.ClearBoundUft();
+                    casted.stopImpersonating();
                     __result = null;
                 }
             }
@@ -86,15 +88,13 @@ namespace FinishWhatYouStarted
         static bool Prefix(Pawn pawn, Bill_ProductionWithUft bill, ref UnfinishedThing __result)
         {
             //Log.Message("HELLO FROM Patch_WorkGiver_DoBill_ClosestUnfinishedThingForBill");
-            if (bill is FinishWhatYouStarted_Bill)
+            FinishWhatYouStarted_Bill casted = bill as FinishWhatYouStarted_Bill;
+            if (casted != null)
             {
                 UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
                 if (ut != null)
                 {
-                    FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(ut.Recipe, ut.StyleSourcePrecept);
-                    Utility.SwitchBills(bill, newBill);
-                    newBill.ingredientFilter.SetDisallowAll();
-                    newBill.SetBoundUft(ut);
+                    casted.startImpersonating(ut);
                     __result = ut;
                     return false;
                 }
