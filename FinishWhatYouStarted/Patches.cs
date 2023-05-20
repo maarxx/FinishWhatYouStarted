@@ -47,7 +47,7 @@ namespace FinishWhatYouStarted
         {
             Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
             FinishWhatYouStarted_Bill casted = __instance as FinishWhatYouStarted_Bill;
-            if (casted != null)
+            if (casted != null && casted.boundTick != Find.TickManager.TicksGame)
             {
                 if (__result == null || __result.Creator.CurJob?.bill != __instance)
                 {
@@ -68,7 +68,7 @@ namespace FinishWhatYouStarted
         {
             Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
             FinishWhatYouStarted_Bill casted = __instance as FinishWhatYouStarted_Bill;
-            if (casted != null)
+            if (casted != null && casted.boundTick != Find.TickManager.TicksGame)
             {
                 if (__result == null || __result.CurJob?.bill != __instance)
                 {
@@ -91,13 +91,20 @@ namespace FinishWhatYouStarted
             FinishWhatYouStarted_Bill casted = bill as FinishWhatYouStarted_Bill;
             if (casted != null)
             {
-                __result = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
-                if (__result != null && __result.Recipe != casted.recipe)
+                __result = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)casted.billStack.billGiver);
+                if (__result != null)
                 {
-                    FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(__result.Recipe, __result.StyleSourcePrecept);
-                    Utility.SwitchBills(bill, newBill);
-                    newBill.ingredientFilter.SetDisallowAll();
-                    newBill.SetBoundUft(__result);
+                    if (__result.Recipe != casted.recipe)
+                    {
+                        FinishWhatYouStarted_Bill oldBill = casted;
+                        casted = new FinishWhatYouStarted_Bill(__result.Recipe, __result.StyleSourcePrecept);
+                        casted.repeatMode = oldBill.repeatMode;
+                        Utility.SwitchBills(oldBill, casted);
+                    }
+                    casted.boundTick = Find.TickManager.TicksGame;
+                    //if (__result == null) { Log.Message("WTF"); }
+                    casted.SetBoundUft(__result);
+                    casted.ingredientFilter.SetDisallowAll();
                 }
                 return false;
             }

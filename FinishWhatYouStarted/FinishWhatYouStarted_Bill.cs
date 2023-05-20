@@ -5,6 +5,7 @@ namespace FinishWhatYouStarted
 {
     public class FinishWhatYouStarted_Bill : Bill_ProductionWithUft
     {
+        public int boundTick;
         public FinishWhatYouStarted_Bill()
         {
             // Intentionally left blank.
