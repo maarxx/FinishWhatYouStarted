@@ -46,11 +46,12 @@ namespace FinishWhatYouStarted
         static void Postfix(Bill_ProductionWithUft __instance, ref UnfinishedThing __result)
         {
             Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundUft");
-            if (__instance is FinishWhatYouStarted_Bill)
+            FinishWhatYouStarted_Bill casted = __instance as FinishWhatYouStarted_Bill;
+            if (casted != null)
             {
-                if (__result != null && __result.Creator.CurJob?.bill != __instance)
+                if (__result == null || __result.Creator.CurJob?.bill != __instance)
                 {
-                    __instance.ClearBoundUft();
+                    casted.ClearBoundUft();
                     __result = null;
                 }
             }
@@ -66,11 +67,12 @@ namespace FinishWhatYouStarted
         static void Postfix(Bill_ProductionWithUft __instance, ref Pawn __result)
         {
             Log.Message("HELLO FROM Patch_Bill_ProductionWithUft_BoundWorker");
-            if (__instance is FinishWhatYouStarted_Bill)
+            FinishWhatYouStarted_Bill casted = __instance as FinishWhatYouStarted_Bill;
+            if (casted != null)
             {
-                if (__result != null && __result.CurJob?.bill != __instance)
+                if (__result == null || __result.CurJob?.bill != __instance)
                 {
-                    __instance.ClearBoundUft();
+                    casted.ClearBoundUft();
                     __result = null;
                 }
             }
@@ -89,17 +91,15 @@ namespace FinishWhatYouStarted
             FinishWhatYouStarted_Bill casted = bill as FinishWhatYouStarted_Bill;
             if (casted != null)
             {
-                UnfinishedThing ut = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
-                if (ut != null)
+                __result = Utility.ClosestUnfinishedThingForWorkbench(pawn, (Thing)bill.billStack.billGiver);
+                if (__result != null && __result.Recipe != casted.recipe)
                 {
-                    FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(ut.Recipe, ut.StyleSourcePrecept);
+                    FinishWhatYouStarted_Bill newBill = new FinishWhatYouStarted_Bill(__result.Recipe, __result.StyleSourcePrecept);
                     Utility.SwitchBills(bill, newBill);
                     newBill.ingredientFilter.SetDisallowAll();
-                    newBill.SetBoundUft(ut);
-                    newBill.master = casted;
-                    __result = ut;
-                    return false;
+                    newBill.SetBoundUft(__result);
                 }
+                return false;
             }
             return true;
         }
