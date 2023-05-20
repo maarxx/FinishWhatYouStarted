@@ -27,11 +27,12 @@ namespace FinishWhatYouStarted
     {
         public override void startImpersonating(UnfinishedThing ut)
         {
-            FinishWhatYouStarted_Bill_Slave newBill = new FinishWhatYouStarted_Bill_Slave(ut.Recipe);
+            Log.Message("HELLO FROM FinishWhatYouStarted_Bill_Master.startImpersonating");
+            FinishWhatYouStarted_Bill_Slave newBill = new FinishWhatYouStarted_Bill_Slave(ut);
             newBill.ingredientFilter.SetDisallowAll();
             newBill.SetBoundUft(ut);
-            newBill.master = this;
             Utility.SwitchBills(this, newBill);
+            newBill.master = this;
         }
         public FinishWhatYouStarted_Bill_Master(RecipeDef recipe, Precept_ThingStyle precept = null) : base(recipe, precept)
         {
@@ -46,9 +47,15 @@ namespace FinishWhatYouStarted
     public class FinishWhatYouStarted_Bill_Slave : FinishWhatYouStarted_Bill
     {
         public FinishWhatYouStarted_Bill_Master master;
+        public int bornTick;
         public override void stopImpersonating()
         {
+            Log.Message("HELLO FROM FinishWhatYouStarted_Bill_Slave.stopImpersonating");
             Utility.SwitchBills(this, master);
+        }
+        public FinishWhatYouStarted_Bill_Slave(UnfinishedThing ut) : base(ut.Recipe, ut.StyleSourcePrecept)
+        {
+            this.bornTick = Find.TickManager.TicksGame;
         }
         public FinishWhatYouStarted_Bill_Slave(RecipeDef recipe, Precept_ThingStyle precept = null) : base(recipe, precept)
         {
