@@ -126,4 +126,18 @@ namespace FinishWhatYouStarted
             return true;
         }
     }
+
+    [HarmonyPatch(typeof(Bill))]
+    [HarmonyPatch("Label", MethodType.Getter)]
+    class Patch_Bill_Label
+    {
+        static void Postfix(Bill __instance, ref string __result)
+        {
+            Log.Message("HELLO FROM Patch_Bill_Label");
+            if (__instance is FinishWhatYouStarted_Bill && __instance.recipe.defName != "FinishWhatYouStarted_Recipe")
+            {
+                __result = "Complete unfinished thing: " + __result;
+            }
+        }
+    }
 }
