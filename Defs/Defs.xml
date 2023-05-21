@@ -1,0 +1,20 @@
+<Defs>
+  <RecipeDef>
+    <defName>FinishWhatYouStarted_Recipe</defName>
+    <label>complete unfinished thing</label>
+    <description>Complete any existing unfinished thing that matches this type of workbench.</description>
+    <jobString>finishing</jobString>
+    <workAmount>1</workAmount>
+    <ingredients>
+      <li>
+        <filter>
+          <customSummary>an unfinished thing</customSummary>
+          <categories>
+            <li>Unfinished</li>
+          </categories>
+        </filter>
+        <count>1</count>
+      </li>
+    </ingredients>
+  </RecipeDef>
+</Defs>
